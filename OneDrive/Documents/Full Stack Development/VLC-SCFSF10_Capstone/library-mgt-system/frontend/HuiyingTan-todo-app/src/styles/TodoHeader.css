@@ -1,0 +1,38 @@
+.todo-header {
+  width: 100%;
+  text-align: center;
+  padding: 1.5rem 1rem;
+  background-color: #f0f4f8;
+  box-sizing: border-box;
+  margin: 0;
+}
+
+.app-title {
+  font-size: 2rem;
+  margin: 0;
+  color: #222;
+}
+
+.app-subtitle {
+  margin-top: 0.25rem;
+  font-size: 1.1rem;
+  color: #353434;
+}
+
+.app-date {
+  margin-top: 0.25rem;
+  font-size: 0.95rem;
+  color: #353434;
+}
+
+/* Responsive styles for larger screens */
+@media (min-width: 600px) {
+  .app-title {
+    font-size: 2.25rem;
+  }
+
+  .app-date {
+    font-size: 1.1rem;
+  }
+}
+

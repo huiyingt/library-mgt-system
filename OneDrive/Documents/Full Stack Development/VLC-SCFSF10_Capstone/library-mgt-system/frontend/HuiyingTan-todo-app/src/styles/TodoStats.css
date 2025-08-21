@@ -1,0 +1,15 @@
+.todo-stats {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 1rem;
+  background-color: #f9fafb;
+  max-width: 300px;
+  margin: 1rem auto;
+  text-align: center;
+  font-size: 0.95rem;
+}
+
+.todo-stats p {
+  margin: 0.3rem 0;
+  color: #444;
+}

@@ -1,0 +1,55 @@
+package com.example.librarymgt.model;
+import jakarta.persistence.*;
+
+@Entity
+@Table(name="roles")//for SQL database
+
+public class Role {
+
+	public enum roleType {
+        SystemAdmin,
+        Librarian,
+        Member
+    }
+	
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY) //auto-generated
+	@Column(name = "role_id")
+	private Long roleid; //a new ID will be generated automatically for each new role
+	
+	@Enumerated(EnumType.STRING)   // store as string "SystemAdmin" / "Librarian" / "Member"
+	@Column(name = "role_type", nullable = false, unique = true)
+	private roleType roleType; //roleType is a unique identifier for roles
+	
+	// Constructors, getters, and setters
+	public Role() {
+		super();
+	}
+	
+	public Role(roleType roleType) {
+		super();
+		this.roleType = roleType;
+	}
+	
+	public Long getId() {
+		return roleid;
+	}
+	
+	public void setId(Long roleid) {
+		this.roleid = roleid;
+	}
+	
+	public roleType getRoleType() {
+		return roleType;
+	}
+	
+	public void setRoleType(roleType roleType) {
+		this.roleType = roleType;
+	}
+	
+	@Override
+	public String toString() {
+		return "Role [ID = " + roleid + ", Role Type = " + roleType + "]";
+	}
+	
+}
