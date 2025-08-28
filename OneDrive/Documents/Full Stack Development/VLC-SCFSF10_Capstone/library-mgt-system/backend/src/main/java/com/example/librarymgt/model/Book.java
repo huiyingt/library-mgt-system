@@ -16,7 +16,7 @@ public class Book {
 	@Column(name = "book_id")
 	private Long bookid; //a new ID will be generated automatically for each new book
 	
-	@Column(name = "isbnd", unique = true, nullable = false, length = 50)
+	@Column(name = "isbn", unique = true, nullable = false, length = 50)
 	private String isbn; //ISBN is a unique identifier for books
 	
 	@Column(name = "book_title", nullable = false, length = 255)
@@ -30,7 +30,7 @@ public class Book {
 	private Category category;	
 	
 	@Column(name = "publication_year", nullable = false)
-	private String publicationYear;
+	private Integer publicationYear;
 
 
 	// Constructors, getters, and setters
@@ -38,7 +38,7 @@ public class Book {
 		super();
 	}
 
-	public Book(String isbn, String title, String author, Category category, String publicationYear) {
+	public Book(String isbn, String title, String author, Category category, Integer publicationYear) {
 		super();
 		this.isbn = isbn;
 		this.title = title;
@@ -87,11 +87,11 @@ public class Book {
 		this.category = category;
 	}
 	
-	public String getPublicationYear() {
+	public Integer getPublicationYear() {
 		return publicationYear;
 	}
 	
-	public void setPublicationYear(String publicationYear) {
+	public void setPublicationYear(Integer publicationYear) {
 		this.publicationYear = publicationYear;
 	}
 

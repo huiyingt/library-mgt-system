@@ -23,9 +23,9 @@ public class RoleController {
 	}
 	
 	@GetMapping("/{id}") //endpoint to get a role by ID
-	public Optional<Role> getRoleById(@PathVariable Long roleid) {
+	public Optional<Role> getRoleById(@PathVariable Long id) {
 		// This method will handle the retrieval of a role by ID
-		return roleServices.getRoleById(roleid); //call the service to get the role by ID
+		return roleServices.getRoleById(id); //call the service to get the role by ID
 		// The role object will be returned as the response
 	}
 	
@@ -37,14 +37,14 @@ public class RoleController {
 	}
 	
 	@PutMapping("/update/{id}") //endpoint to update a role by ID (pathvariable)
-	public Role updateRole(@PathVariable Long roleid, @RequestBody Role role) {
+	public Role updateRole(@PathVariable Long id, @RequestBody Role role) {
 		// This method will handle the update of an existing role
-		return roleServices.updateRole(roleid, role); //call the service to update the role
+		return roleServices.updateRole(id, role); //call the service to update the role
 		// The updated role object will be returned as the response
 	}
 	
 	@DeleteMapping("/delete/{id}") //endpoint to delete a role by ID (pathvariable)
-	public void deleteRole(@PathVariable Long roleid) {
-		roleServices.deleteRole(roleid); //call the service to delete the role by ID
+	public void deleteRole(@PathVariable Long id) {
+		roleServices.deleteRole(id); //call the service to delete the role by ID
 	}
 }

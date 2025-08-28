@@ -1,7 +1,7 @@
 package com.example.librarymgt.model;
 import java.util.Date;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 
@@ -17,8 +17,8 @@ public class User {
 	
 	@ManyToOne(fetch = FetchType.EAGER)  
     @JoinColumn(name = "role_id", nullable = false) // FK in Users table
-	@JsonIgnore // Prevent circular reference issues in JSON serialization
-    private Role roleid; 
+	@JsonIgnoreProperties({"users"}) // Prevent circular reference issues in JSON serialization
+    private Role role; 
 	
 	@Column(name = "user_name", nullable = false, length = 255)
 	private String username; //Username is a unique identifier for users
@@ -50,7 +50,7 @@ public class User {
 
 	public User(Role role, String username, String password, String email, String contactNo, String address, Date membershipStartDate, Date membershipEndDate) {
 		super();
-		this.roleid = role;
+		this.role = role;
 		this.username = username;
 		this.password = password;
 		this.email = email;
@@ -69,11 +69,11 @@ public class User {
 	}
 
 	public Role getRole() {
-		return roleid;
+		return role;
 	}
 
-	public void setRole(Role roleid) {
-		this.roleid = roleid;
+	public void setRole(Role role) {
+		this.role = role;
 	}
 	
 	public String getUsername() {
@@ -134,7 +134,7 @@ public class User {
 	
 	@Override
 	public String toString() {
-		return "User [ID = " + id + ", Role ID = " + roleid + ", Username = " + username + ", Email = " + email + ", Contact No = " + contactNo + ", Address = " + address + ", Membership Start Date = " + membershipStartDate + ", Membership End Date = " + membershipEndDate + "]";
+		return "User [ID = " + id + ", Role = " + role + ", Username = " + username + ", Email = " + email + ", Contact No = " + contactNo + ", Address = " + address + ", Membership Start Date = " + membershipStartDate + ", Membership End Date = " + membershipEndDate + "]";
 	}
 }
 

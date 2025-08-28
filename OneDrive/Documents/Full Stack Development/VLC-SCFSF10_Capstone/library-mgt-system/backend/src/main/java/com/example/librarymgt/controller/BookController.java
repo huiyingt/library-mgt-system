@@ -1,6 +1,8 @@
 package com.example.librarymgt.controller;
 
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +25,7 @@ public class BookController {
 		// The saved book object will be returned as the response	
 	}
 	
-	@GetMapping("/{id}") //endpoint to get a book by ID
+	@GetMapping("/{bookid}") //endpoint to get a book by ID
 	public Optional<Book> getBookById(@PathVariable Long bookid) {
 		// This method will handle the retrieval of a book by ID
 		return bookServices.getBookById(bookid); //call the service to get the book by ID
@@ -51,7 +53,17 @@ public class BookController {
 		// A list of book objects will be returned as the response
 	}
 	
-	@PutMapping("/update/{id}") //endpoint to update a book by ID (pathvariable)
+	// Endpoint to search books by title or author (case-insensitive)
+	// Search by title OR author (single input box)
+	@GetMapping("/search")
+	public List<Book> searchBooks(@RequestParam String query) {
+	    if (query == null || query.trim().isEmpty()) {
+	        return new ArrayList<>(); // return empty list if nothing entered
+	    }
+	    return bookServices.searchBooks(query);
+	}
+	
+	@PutMapping("/update/{bookid}") //endpoint to update a book by ID (pathvariable)
 	public Book updateBook(@PathVariable Long bookid, @RequestBody Book book) {
 		// This method will handle the update of an existing book
 		// It will receive a Book object from the request body
@@ -59,7 +71,7 @@ public class BookController {
 		// The updated book object will be returned as the response
 	}
 	
-	@DeleteMapping("/delete/{id}") //endpoint to delete a book by ID
+	@DeleteMapping("/delete/{bookid}") //endpoint to delete a book by ID
 	public void deleteBook(@PathVariable Long bookid) {
 		// This method will handle the deletion of a book by ID
 		bookServices.deleteBook(bookid); //call the service to delete the book

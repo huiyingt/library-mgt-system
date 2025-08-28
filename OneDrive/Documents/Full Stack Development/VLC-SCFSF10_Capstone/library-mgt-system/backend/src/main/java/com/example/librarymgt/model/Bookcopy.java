@@ -22,6 +22,9 @@ public class Bookcopy {
 	@JoinColumn(name = "book_id", nullable = false) // FK in BookCopies table
 	private Book book; // The book this copy belongs to
 	
+	@Column (name = "copy_number", nullable = false)
+	private int copyNumber; // Number of this copy of the book (e.g., 1)
+	
 	@Enumerated(EnumType.STRING)   // store as string "AVAILABLE" / "BORROWED" / "RESERVED" / "OVERDUE"
 	@Column(name = "book_status", nullable = false)
 	private Status status; // Status of the book copy
@@ -31,9 +34,10 @@ public class Bookcopy {
 		super();
 	}
 
-	public Bookcopy(Book book, Status status) {
+	public Bookcopy(Book book, int copyNumber, Status status) {
 		super();
 		this.book = book;
+		this.copyNumber = copyNumber; 
 		this.status = status;
 	}
 
@@ -52,7 +56,15 @@ public class Bookcopy {
 	public void setBook(Book book) {
 		this.book = book;
 	}
-
+	
+	public int getCopyNumber() {
+		return copyNumber;
+	}
+	
+	public void setCopyNumber(int copyNumber) {
+		this.copyNumber = copyNumber;
+	}
+	
 	public Status getStatus() {
 		return status;
 	}
@@ -63,7 +75,7 @@ public class Bookcopy {
 	
 	@Override
 	public String toString() {
-		return "Book Copy [ID = " + copyid + ", Book ID = " + book + ", Status = " + status + "]";
+		return "Book Copy [ID = " + copyid + ", Book ID = " + book + "Copy Number = " + copyNumber + ", Status = " + status + "]";
 	}
 	
 }

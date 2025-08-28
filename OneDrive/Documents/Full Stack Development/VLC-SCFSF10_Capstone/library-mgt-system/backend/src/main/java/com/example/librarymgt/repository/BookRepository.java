@@ -1,5 +1,6 @@
 package com.example.librarymgt.repository;
 
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import com.example.librarymgt.model.Book;
@@ -13,5 +14,7 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 // Custom query - this allows us to find a book by its title
     Optional<Book> findByTitle(String title);
     Optional<Book> findByAuthor(String author);
+
+    List<Book> findByTitleContainingIgnoreCaseOrAuthorContainingIgnoreCase(String title, String author);
 }
 

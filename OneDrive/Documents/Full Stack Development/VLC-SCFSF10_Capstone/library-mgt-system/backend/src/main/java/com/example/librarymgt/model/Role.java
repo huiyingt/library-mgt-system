@@ -15,7 +15,7 @@ public class Role {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY) //auto-generated
 	@Column(name = "role_id")
-	private Long roleid; //a new ID will be generated automatically for each new role
+	private Long id; //a new ID will be generated automatically for each new role
 	
 	@Enumerated(EnumType.STRING)   // store as string "SystemAdmin" / "Librarian" / "Member"
 	@Column(name = "role_type", nullable = false, unique = true)
@@ -32,11 +32,11 @@ public class Role {
 	}
 	
 	public Long getId() {
-		return roleid;
+		return id;
 	}
 	
-	public void setId(Long roleid) {
-		this.roleid = roleid;
+	public void setId(Long id) {
+		this.id = id;
 	}
 	
 	public roleType getRoleType() {
@@ -49,7 +49,7 @@ public class Role {
 	
 	@Override
 	public String toString() {
-		return "Role [ID = " + roleid + ", Role Type = " + roleType + "]";
+		return "Role [ID = " + id + ", Role Type = " + roleType + "]";
 	}
 	
 }

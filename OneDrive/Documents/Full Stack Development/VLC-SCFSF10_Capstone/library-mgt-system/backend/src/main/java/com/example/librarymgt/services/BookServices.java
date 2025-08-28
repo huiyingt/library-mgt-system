@@ -3,6 +3,8 @@ package com.example.librarymgt.services;
 //perform CRUD operations on Book data
 import com.example.librarymgt.repository.BookRepository;
 import com.example.librarymgt.model.Book;
+
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,8 +42,13 @@ public class BookServices {
 	public List<Book> getAllBooks() {
 		// Use BookRepository to find all books
 		return bookr.findAll(); //returns a list of all books
-	}	
+	}
 	
+	public List<Book> searchBooks(String query) {
+	    return bookr.findByTitleContainingIgnoreCaseOrAuthorContainingIgnoreCase(query, query);
+	}
+	
+
 	public Book updateBook(Long bookid, Book bookDetails) {
 		// Use BookRepository to find the book by ID
 		Book existingBook = bookr.findById(bookid)
@@ -55,8 +62,14 @@ public class BookServices {
 			existingBook.setAuthor(bookDetails.getAuthor());	
 		if (bookDetails.getCategory() != null) //check if category is not null
 			existingBook.setCategory(bookDetails.getCategory());
-		if (bookDetails.getPublicationYear() != null) //check if published date is not null
-			existingBook.setPublicationYear(bookDetails.getPublicationYear());
+		if (bookDetails.getPublicationYear() != null) {
+		    Integer year = bookDetails.getPublicationYear();
+		    if (year >= 1000 && year <= LocalDate.now().getYear()) {
+		        existingBook.setPublicationYear(year);
+		    } else {
+		        throw new IllegalArgumentException("Invalid publication year: " + year);
+		    }
+		}
 		// Save the updated book
 		System.out.println("Book updated: " + existingBook);
 		return bookr.save(existingBook); //returns the updated book object	

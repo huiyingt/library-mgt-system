@@ -22,9 +22,9 @@ public class RoleServices {
 		return roleRepository.save(role); //returns the saved role object
 	}
 	
-	public Optional<Role> getRoleById(Long roleid) {
+	public Optional<Role> getRoleById(Long id) {
 		// Use RoleRepository to find the role by ID
-		return roleRepository.findById(roleid); //returns the role if found, otherwise null
+		return roleRepository.findById(id); //returns the role if found, otherwise null
 	}
 	
 	public List<Role> getAllRoles() {
@@ -32,10 +32,10 @@ public class RoleServices {
 		return roleRepository.findAll(); //returns a list of all roles
 	}
 	
-	public Role updateRole(Long roleid, Role roleDetails) {
+	public Role updateRole(Long id, Role roleDetails) {
 		// Use RoleRepository to find the role by ID
-		Role existingRole = roleRepository.findById(roleid)
-				.orElseThrow(() -> new RuntimeException("Role not found with ID: " + roleid));
+		Role existingRole = roleRepository.findById(id)
+				.orElseThrow(() -> new RuntimeException("Role not found with ID: " + id));
 		// Update the existing role's details
 		if (roleDetails.getRoleType() != null) //check if name is not null
 			existingRole.setRoleType(roleDetails.getRoleType());
@@ -44,9 +44,9 @@ public class RoleServices {
 		return roleRepository.save(existingRole); //returns the updated role object
 	}
 	
-	public void deleteRole(Long roleid) {
+	public void deleteRole(Long id) {
 		// Use RoleRepository to delete the role by ID
-		roleRepository.deleteById(roleid); //deletes the role if found
-		System.out.println("Role deleted with ID: " + roleid);
+		roleRepository.deleteById(id); //deletes the role if found
+		System.out.println("Role deleted with ID: " + id);
 	}
 }

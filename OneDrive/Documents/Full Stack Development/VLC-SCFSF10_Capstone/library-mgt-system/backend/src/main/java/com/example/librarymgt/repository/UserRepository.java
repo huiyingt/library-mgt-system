@@ -1,4 +1,5 @@
 package com.example.librarymgt.repository;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import com.example.librarymgt.model.User;
@@ -11,5 +12,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	
 	Optional<User> findByEmail(String email); // Method to find a user by email
 	Optional<User> findByUsername(String username); // Method to find a user by username
-	
+	List<User> findByUsernameContainingIgnoreCaseOrEmailContainingIgnoreCase(String username, String email);
 }
