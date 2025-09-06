@@ -28,7 +28,7 @@ public class Loanitem {
 	private LocalDate returnDate; // Return date of the book copy, can be null if not returned yet
 	
 	@Column(name = "renewal_count", nullable = false)
-	private int renewalCount; // Number of times the loan has been renewed, default is 0
+	private String renewalCount; // Number of times the loan has been renewed, default is 0
 	
 	@Column(name = "fine_amount", nullable = true)
 	private double fineAmount; // Fine amount for overdue books, can be null if no fine is applied
@@ -44,7 +44,7 @@ public class Loanitem {
 		super();
 	}
 
-	public Loanitem(Loan loan, Bookcopy bookCopy, LocalDate dueDate, LocalDate returnDate, int renewalCount, double fineAmount) {
+	public Loanitem(Loan loan, Bookcopy bookCopy, LocalDate dueDate, LocalDate returnDate, String renewalCount, double fineAmount) {
 		super();
 		this.loan = loan;
 		this.bookCopy = bookCopy;
@@ -94,11 +94,11 @@ public class Loanitem {
 		this.returnDate = returnDate;
 	}
 	
-	public int getRenewalCount() {
+	public String getRenewalCount() {
 		return renewalCount;
 	}
 	
-	public void setRenewalCount(int renewalCount) {
+	public void setRenewalCount(String renewalCount) {
 		this.renewalCount = renewalCount;
 	}
 	
@@ -121,7 +121,8 @@ public class Loanitem {
      * @return true if the item can be renewed, false otherwise.
      */
     public boolean canRenew() {
-        return !isOverdue() && this.renewalCount < MAX_RENEWALS;
+    	int count = Integer.parseInt(this.renewalCount); // parse string to int
+    	return !isOverdue() && count < MAX_RENEWALS;
     }
 
     /**
@@ -129,9 +130,10 @@ public class Loanitem {
      * @throws IllegalStateException if the loan cannot be renewed.
      */
     public void renew() {
+    	int count = Integer.parseInt(this.renewalCount);
         if (canRenew()) {
             this.dueDate = this.dueDate.plusDays(RENEWAL_PERIOD_DAYS);
-            this.renewalCount++;
+            this.renewalCount = String.valueOf(count + 1); // convert back to string
         } else {
             throw new IllegalStateException("Cannot renew this loan item. It is overdue or the renewal limit has been reached.");
         }

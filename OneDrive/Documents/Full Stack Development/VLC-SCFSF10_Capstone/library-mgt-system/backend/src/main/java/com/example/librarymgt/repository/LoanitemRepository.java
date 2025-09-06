@@ -22,4 +22,8 @@ public interface LoanitemRepository extends JpaRepository<Loanitem, Long> {
 	@Query("SELECT li FROM Loanitem li WHERE li.dueDate < :currentDate AND li.returnDate IS NULL")
     List<Loanitem> findOverdueLoanitems(LocalDate currentDate);
 	
+	List<Loanitem> findByLoanUserIdAndReturnDateIsNull(Long userId);
+	List<Loanitem> findByLoanUserUsernameAndReturnDateIsNull(String username);
+
+	
 }

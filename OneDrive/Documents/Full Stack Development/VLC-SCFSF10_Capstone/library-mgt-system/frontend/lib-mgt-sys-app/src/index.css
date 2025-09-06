@@ -80,6 +80,20 @@ header {
   gap: 0.5rem;
 }
 
+.user-logged-in {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.user-icon.clickable {
+  color: white;
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
 .login-button, .logout-button, .mobile-login-button, .mobile-logout-button {
   background: none;
   border: none;
@@ -560,6 +574,44 @@ footer .footer-right a:hover {
   font-weight: bold;
   color: #1E3A8A;
   margin-bottom: 1rem;
+}
+
+/* -------------------- Member Page -------------------- */
+
+/* Stats section inside the dashboard card */
+.dashboard-stats {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.stat-box {
+  flex: 1 1 200px;
+  background-color: #F9FAFB;
+  border: 1px solid #E5E7EB;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* Loan Items Table */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th, .table td {
+  border: 1px solid #E5E7EB;
+  padding: 0.75rem;
+  text-align: left;
+}
+
+.table th {
+  background-color: #2563EB;
+  color: white;
+  font-weight: 600;
 }
 
 /* --------------Search & Results Section--------------*/

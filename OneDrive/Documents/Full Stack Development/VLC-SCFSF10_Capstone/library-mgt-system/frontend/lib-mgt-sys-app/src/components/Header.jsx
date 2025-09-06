@@ -7,6 +7,8 @@ const Header = ({user, onLogout }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
 
+  console.log('Header user prop:', user);
+
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
@@ -16,6 +18,11 @@ const Header = ({user, onLogout }) => {
     setIsMenuOpen(false); // Close menu on navigation
   };
 
+  // Logout handler inside Header
+  const handleLogout = () => {
+  if (onLogout) onLogout(); // call the parent logout logic
+  navigate('/home');         // then redirect to home
+  };
 
   return (
     <header className="header-container">
@@ -33,17 +40,23 @@ const Header = ({user, onLogout }) => {
       {/* Desktop Navigation */}
       <nav className="desktop-nav">
         <a href="/books" onClick={() => goToPage('/books')} className="nav-link">Books</a>
-        <a href="#" onClick={() => goToPage('/services')} className="nav-link">Services</a>
         <a href="#" onClick={() => goToPage('/about')} className="nav-link">About Us</a>
       </nav>
 
-      {/* User / Login / Mobile Menu */}
+      {/* User / Login / Member Icon / Mobile Menu */}
       <div className="user-menu-container">
         {user ? (
           <div className="user-logged-in">
-            <User className="user-icon" />
+            {/* Member Icon - go to MemberPage */}
+            <User
+              className="user-icon clickable"
+              title="My Account"
+              onClick={() => goToPage('/member')}
+            />
             <span className="user-name">Hi, {user.username}</span>
-            <button onClick={onLogout} className="logout-button" aria-label="Logout">
+
+            {/* Logout Button */}
+            <button onClick={handleLogout} className="logout-button" aria-label="Logout">
               <LogOut className="lucide-icon" />
             </button>
           </div>
@@ -57,8 +70,8 @@ const Header = ({user, onLogout }) => {
             <span className="login-text">Login</span>
           </button>
         )}
-        
-      {/* Mobile Menu Button */}
+
+        {/* Mobile Menu Button */}
         <button
           onClick={toggleMenu}
           className="mobile-menu-button"
@@ -71,13 +84,23 @@ const Header = ({user, onLogout }) => {
       {/* Mobile Navigation Menu */}
       {isMenuOpen && (
         <div className="mobile-nav-menu">
-          <a href="books" onClick={() => goToPage('/books')} className="action-button hover-button">Books</a>
-          <a href="services" onClick={() => goToPage('/services')} className="action-button hover-button">Services</a>
-          <a href="about" onClick={() => goToPage('/about')} className="action-button hover-button">About Us</a>
-
-      </div>
+          <a href="Books" onClick={() => goToPage('/books')} className="action-button hover-button">Books</a>
+          <a href="About" onClick={() => goToPage('/about')} className="action-button hover-button">About Us</a>
+          {user && (
+            <a href="Member" onClick={() => goToPage('/member')} className="action-button hover-button">My Account</a>
+          )}
+          {user && (
+            <button
+              onClick={onLogout}
+              className="action-button hover-button"
+            >
+              Logout
+            </button>
+          )}
+        </div>
       )}
-  </header>
-  )
+    </header>
+  );
 };
+
 export default Header;

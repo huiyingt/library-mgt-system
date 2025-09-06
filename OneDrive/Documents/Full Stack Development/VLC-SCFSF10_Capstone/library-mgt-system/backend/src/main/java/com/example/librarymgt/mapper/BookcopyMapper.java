@@ -16,16 +16,23 @@ public class BookcopyMapper {
         dto.setAuthor(book.getAuthor());
         dto.setCategory(book.getCategory().name());
         dto.setPublicationYear(book.getPublicationYear());
+        dto.setCopies(book.getCopies().stream()
+			.map(BookcopyMapper::toBookcopyDTO)
+			.toList()
+		);
         return dto;
     }
 
     public static BookcopyDTO toBookcopyDTO(Bookcopy bookcopy) {
         if (bookcopy == null) return null;
 
-        BookcopyDTO dto = new BookcopyDTO();
-        dto.setCopyNumber(bookcopy.getCopyNumber());
-        dto.setStatus(bookcopy.getStatus()); // enum, not string
-        dto.setBook(toBookDTO(bookcopy.getBook()));
-        return dto;
+     // Map to your new constructor
+        return new BookcopyDTO(
+            bookcopy.getId(), // copyId
+        	bookcopy.getCopyNumber(),
+            bookcopy.getStatus().name(), // convert enum to string
+            bookcopy.getBook().getId(), // book ID
+            bookcopy.getBook().getTitle()   // book title
+        );
     }
 }

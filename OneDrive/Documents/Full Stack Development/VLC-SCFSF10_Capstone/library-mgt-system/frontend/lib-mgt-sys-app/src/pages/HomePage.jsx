@@ -38,24 +38,14 @@ const HomePage = () => {
           <div className="visit-card hover-card">
             <h2 className="visit-title">Visit Us</h2>
             <div className="location-container">
-              <label className="location-label">My Community Library is located at: </label><br/>
-              <label className="location-address">21 Springdale Road Singapore 111222</label>
+              <label className="location-label">My Community Library is located at: </label><br/><br/>
+              <label className="location-address"><strong>21 Springdale Road Singapore 111222</strong></label>
             </div>
-            <p className="hours-text">Open today from <strong>10:00 AM to 08:00 PM</strong></p>
-          </div>
-        </div>
-
-        {/* Quick Actions */}
-        <div>
-          <h3 className="actions-title">What would you like to do today?</h3>
-          <div className="actions-container">
-            <button className="action-button hover-button">Sign up for Membership</button>
-            <button className="action-button hover-button">Loans and Reservations</button>
-            <button className="action-button hover-button">Browse new book arrivals</button>
+            <p className="hours-text">Opens daily from <strong>10:00 AM to 07:00 PM</strong></p>
           </div>
         </div>
       </main>
-
+      
       {/* Footer component is rendered in App.jsx */}
     </div>
   );

@@ -3,6 +3,9 @@ package com.example.librarymgt.services;
 //perform CRUD operations on Book data
 import com.example.librarymgt.repository.BookRepository;
 import com.example.librarymgt.model.Book;
+import com.example.librarymgt.model.Bookcopy;
+import com.example.librarymgt.dto.BookDTO;
+import com.example.librarymgt.dto.BookcopyDTO;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -15,7 +18,7 @@ public class BookServices {
 
 	@Autowired //to inject the BookRepository bean
 	private BookRepository bookr; //repository to access Book data
-	
+
 	public Book saveBook(Book book) {
 		// Need data: a book object
 		// saveBook requires Book details
@@ -43,12 +46,103 @@ public class BookServices {
 		// Use BookRepository to find all books
 		return bookr.findAll(); //returns a list of all books
 	}
+
+	// ------------------- USER ENDPOINTS -------------------
+	// Search available books by title or author (case-insensitive)
+	public List<BookDTO> searchBooksForUsersDTO(String query) {
+        List<Book> books = bookr.findByTitleContainingIgnoreCaseOrAuthorContainingIgnoreCase(query, query);
+
+        return books.stream()
+            .map(book -> {
+                List<BookcopyDTO> availableCopies = book.getCopies().stream()
+                    .filter(c -> c.getStatus() == Bookcopy.Status.AVAILABLE)
+                    .map(c -> new BookcopyDTO(
+                    		c.getId(),
+                    		c.getCopyNumber(), 
+                    		c.getStatus().name(), 
+                    		c.getBook().getId(), 
+                    		c.getBook().getTitle()
+                    		))
+                    .toList();
+                
+             // Skip books with no available copies
+                if (availableCopies.isEmpty()) return null;
+
+                // Map Book entity to BookDTO
+                BookDTO dto = new BookDTO();
+                dto.setIsbn(book.getIsbn());
+                dto.setTitle(book.getTitle());
+                dto.setAuthor(book.getAuthor());
+                dto.setCategory(book.getCategory().name());
+                dto.setPublicationYear(book.getPublicationYear());
+                dto.setCopies(availableCopies);
+
+                return dto;
+            })
+            .filter(dto -> dto != null)
+            .toList();
+    }
 	
-	public List<Book> searchBooks(String query) {
-	    return bookr.findByTitleContainingIgnoreCaseOrAuthorContainingIgnoreCase(query, query);
+	// ------------------- LIBRARIAN ENDPOINTS -------------------
+	// For librarians: show all books with all copies (DTO)
+	public List<BookDTO> getAllBooksWithCopiesForLibrariansDTO() {
+	    List<Book> books = bookr.findAllWithCopies();
+
+	    return books.stream()
+	        .map(book -> {
+	            List<BookcopyDTO> copies = book.getCopies().stream()
+	                .map(c -> new BookcopyDTO(
+	                		c.getId(),
+	                		c.getCopyNumber(), 
+	                		c.getStatus().name(), 
+	                		c.getBook().getId(), 
+	                		c.getBook().getTitle()
+	                		))
+	                .toList();
+
+	            BookDTO dto = new BookDTO();
+	            dto.setIsbn(book.getIsbn());
+	            dto.setTitle(book.getTitle());
+	            dto.setAuthor(book.getAuthor());
+	            dto.setCategory(book.getCategory().name());
+	            dto.setPublicationYear(book.getPublicationYear());
+	            dto.setCopies(copies);
+
+	            return dto;
+	        })
+	        .toList();
+	}
+
+	// For librarians: search books by title or author (case-insensitive) with all copies (DTO)
+	public List<BookDTO> searchBooksForLibrariansDTO(String query) {
+	    List<Book> books = bookr.findByTitleContainingIgnoreCaseOrAuthorContainingIgnoreCase(query, query);
+
+	    return books.stream()
+	        .map(book -> {
+	            List<BookcopyDTO> copies = book.getCopies().stream()
+	                .map(c -> new BookcopyDTO(
+	                		c.getId(),
+	                		c.getCopyNumber(), 
+	                		c.getStatus().name(), 
+	                		c.getBook().getId(), 
+	                		c.getBook().getTitle()
+	                		))
+	                .toList();
+
+	            BookDTO dto = new BookDTO();
+	            dto.setIsbn(book.getIsbn());
+	            dto.setTitle(book.getTitle());
+	            dto.setAuthor(book.getAuthor());
+	            dto.setCategory(book.getCategory().name());
+	            dto.setPublicationYear(book.getPublicationYear());
+	            dto.setCopies(copies);
+
+	            return dto;
+	        })
+	        .toList();
 	}
 	
-
+	//update book details
 	public Book updateBook(Long bookid, Book bookDetails) {
 		// Use BookRepository to find the book by ID
 		Book existingBook = bookr.findById(bookid)
@@ -75,6 +169,7 @@ public class BookServices {
 		return bookr.save(existingBook); //returns the updated book object	
 	}
 	
+	//delete book by ID
 	public void deleteBook(Long bookid) {
 		// Use BookRepository to delete the book by ID
 		if (bookr.existsById(bookid)) { //check if book exists

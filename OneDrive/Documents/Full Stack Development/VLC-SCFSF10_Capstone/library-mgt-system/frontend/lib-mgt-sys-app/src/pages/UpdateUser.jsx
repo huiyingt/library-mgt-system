@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { useNavigate } from 'react-router-dom';
 
 export function UpdateUser() {
   const [userIdInput, setUserIdInput] = useState("");
@@ -18,6 +19,12 @@ export function UpdateUser() {
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+
+  const navigate = useNavigate();
+      
+  const handleNavigation = (path) => {
+    navigate(path);
+  };
 
   // Load user details based on entered ID
   const handleLoadUser = async () => {
@@ -180,6 +187,7 @@ export function UpdateUser() {
           </div>
 
           <button type="submit">Update User</button>
+          <button type="submit" onClick={() => handleNavigation('/admin')}>Back to Admin Dashboard</button>
         </form>
       )}
     </div>

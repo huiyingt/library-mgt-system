@@ -5,6 +5,7 @@ drop table Books;
 drop table Loans;
 drop table BookCopies;
 drop table Users;
+drop table Loanitems;
 create table Roles (
 role_id int PRIMARY KEY AUTO_INCREMENT,
 role_type ENUM('SystemAdmin', 'Librarian', 'Member') NOT NULL
@@ -28,9 +29,6 @@ insert into Roles VALUES
 (2, 'Librarian'),
 (3, 'Member')
 
-insert into Users VALUES
-(0001, 02, 'alice', SHA2('alicepw', 256), 'alice@example.com', '12345678', '1 Springville Rd, Singapore 111111', '2025-08-21', '2026-08-20'),
-(0002, 03, 'benjamin', SHA2('benpw', 256), 'benjamin@example.com', '23456789', '2 Springville Rd, Singapore 111112', '2025-08-20', '2026-08-19')
 
 select * from Roles
 select * from Users
@@ -56,6 +54,11 @@ user_id int NOT NULL,
 borrow_date DATE NOT NULL,
 FOREIGN KEY (user_id) REFERENCES Users(user_id)
 );
+insert into Loans VALUES
+(03, 20, '2025-08-17')
+(01, 17, '2025-09-06'),
+(02, 18, '2025-09-06');
+select * from Loans;
 
 create table BookCopies (
 copy_id int PRIMARY KEY AUTO_INCREMENT,
@@ -64,12 +67,14 @@ copy_number int NOT NULL,
 book_status ENUM('AVAILABLE', 'BORROWED', 'RESERVED', 'OVERDUE') NOT NULL,
 FOREIGN KEY (book_id) REFERENCES Books(book_id)
 );
+delete from BookCopies
+WHERE copy_id = 35;
 select * from BookCopies;
 insert into BookCopies VALUES
-(01, 00001, 1, 'AVAILABLE'),
-(02, 00001, 2, 'AVAILABLE'),
+(01, 00001, 1, 'BORROWED'),
+(02, 00001, 2, 'BORROWED'),
 (03, 00001, 3, 'BORROWED'),
-(04, 00002, 1, 'AVAILABLE'),
+(04, 00002, 1, 'BORROWED'),
 (05, 00002, 2, 'RESERVED'),
 (06, 00002, 3, 'OVERDUE'),
 (07, 00002, 4, 'AVAILABLE');
@@ -78,11 +83,17 @@ create table LoanItems (
 loanitem_id int PRIMARY KEY AUTO_INCREMENT,
 loan_id int NOT NULL,
 copy_id int NOT NULL,
-due_date DATE NOT NULL,
+due_date DATE,
 return_date DATE,
 renewal_count ENUM('0','1','2') NOT NULL,
-fine_amount DECIMAL(2,2),
+fine_amount DECIMAL(3,2),
 FOREIGN KEY (loan_id) REFERENCES Loans(loan_id),
 FOREIGN KEY (copy_id) REFERENCES BookCopies(copy_id)
 );
+insert into LoanItems VALUES
+(01, 01, 15, '2025-09-20', NULL, '0', 0.00),
+(02, 01, 02, '2025-09-20', NULL, '0', 0.00),
+(03, 02, 18, '2025-09-20', NULL, '1', 0.00),
+(04, 03, 17, '2025-08-31', NULL, '0', 3.00);
 
+select * from LoanItems;

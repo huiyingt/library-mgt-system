@@ -1,6 +1,6 @@
 package com.example.librarymgt.repository;
 import java.util.Optional;
-
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import com.example.librarymgt.model.Bookcopy;
 
@@ -13,4 +13,5 @@ public interface BookcopyRepository extends JpaRepository<Bookcopy, Long> {
 	// Custom query method to find a book copy by its status
 	Optional<Bookcopy> findByStatus(Bookcopy.Status status);
 	Optional<Bookcopy> findByBookId(Long bookId);
+	List<Bookcopy> findAllByBookId(Long bookId);
 }

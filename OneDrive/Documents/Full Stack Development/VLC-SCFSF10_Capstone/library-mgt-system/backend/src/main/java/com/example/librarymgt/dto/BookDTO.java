@@ -1,11 +1,14 @@
 package com.example.librarymgt.dto;
 
+import java.util.List;
+
 public class BookDTO {
     private String isbn;
     private String title;
     private String author;
     private String category;
     private Integer publicationYear;
+    private List<BookcopyDTO> copies; // List of copies of this book
     
     // Getters and Setters
     public String getIsbn() { return isbn; }
@@ -22,6 +25,9 @@ public class BookDTO {
     
     public Integer getPublicationYear() { return publicationYear; }
     public void setPublicationYear(Integer publicationYear) { this.publicationYear = publicationYear; }
+    
+    public List<BookcopyDTO> getCopies() { return copies; }
+    public void setCopies(List<BookcopyDTO> copies) { this.copies = copies; }
     
 }
     

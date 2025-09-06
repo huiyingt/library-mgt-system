@@ -3,6 +3,7 @@ package com.example.librarymgt.services;
 import com.example.librarymgt.dto.BookcopyDTO;
 import com.example.librarymgt.mapper.BookcopyMapper;
 import com.example.librarymgt.model.Bookcopy;
+import com.example.librarymgt.repository.BookRepository;
 import com.example.librarymgt.repository.BookcopyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,7 +14,10 @@ import java.util.Optional;
 public class BookcopyServices {
 
 	@Autowired
-    private BookcopyRepository bookcopyRepository;
+	private BookcopyRepository bookcopyRepository;
+	
+	@Autowired
+    private BookRepository bookRepository;
 
     // Get all book copies as DTOs
     public List<BookcopyDTO> getAllBookcopies() {
@@ -38,8 +42,24 @@ public class BookcopyServices {
 						 .toList();
     }
     
-    // Create a new Bookcopy from entity (if needed)
-    public BookcopyDTO createBookcopy(Bookcopy bookcopy) {
+    // Get a single book copy by ID as Entity
+    public Optional<Bookcopy> getBookcopyEntityById(Long id) {
+        return bookcopyRepository.findById(id);
+    }
+    
+    // Create a new Bookcopy
+    public BookcopyDTO createBookcopy(BookcopyDTO dto) {
+        // Fetch the associated Book entity
+        var book = bookRepository.findById(dto.getBookId())
+                     .orElseThrow(() -> new RuntimeException("Book not found"));
+
+        // Create the Bookcopy entity
+        Bookcopy bookcopy = new Bookcopy();
+        bookcopy.setBook(book);
+        bookcopy.setCopyNumber(dto.getCopyNumber());
+        bookcopy.setStatus(Bookcopy.Status.valueOf(dto.getStatus())); // Assuming status is an enum
+
+        // Save and convert back to DTO
         Bookcopy saved = bookcopyRepository.save(bookcopy);
         return BookcopyMapper.toBookcopyDTO(saved);
     }

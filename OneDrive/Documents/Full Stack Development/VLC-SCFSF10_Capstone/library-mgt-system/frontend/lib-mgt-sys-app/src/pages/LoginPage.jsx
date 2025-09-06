@@ -22,13 +22,15 @@ export function LoginPage({onLogin}) {
         // const userRole = data.role?.roleType || data.roles?.[0]?.roleType;
 
         // Call App.jsx onLogin to set currentUser
-        onLogin(data.user);
+        console.log('Login response data:', data);
+        console.log('Logging in user:', data.user);
+        onLogin(data);
 
         // Redirect based on role
         if (data.role === 'Librarian') {
           navigate('/admin'); // <-- go to LibrarianAdminPage
         } else {
-          navigate('/'); // <-- go to HomePage for normal users
+          navigate('/home'); // <-- go to HomePage for normal users
         }
       
     } catch (error) {

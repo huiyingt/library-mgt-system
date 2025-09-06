@@ -1,13 +1,18 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import HomePage from './pages/HomePage';
+import AboutUs from './pages/AboutUs';
 import { SearchBook } from './pages/SearchBook';
 import { LoginPage } from './pages/LoginPage';
+import { MemberPage } from './pages/MemberPage';
 import { LibrarianAdminPage } from './pages/LibrarianAdminPage';  
 import { CreateBook } from './pages/CreateBook';
+import { SearchBookLib } from './pages/SearchBookLib';
+import { UpdateBook } from './pages/UpdateBook';
 import { CreateUser } from './pages/CreateUser';
 import { UpdateUser } from './pages/UpdateUser';
 import { SearchUser } from './pages/SearchUser';
+import { ManageLoan } from './pages/ManageLoan';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import './index.css'
@@ -16,44 +21,41 @@ import './index.css'
 const App = () => {
   const [currentUser, setCurrentUser] = useState(null); // State for the logged-in user
 
-  // Simulate a login process
-  const handleLogin = () => {
-    console.log("Attempting to log in...");
-    setTimeout(() => {
-      setCurrentUser({ id: 'user123', name: 'John Doe', email: 'john.doe@example.com' });
-      console.log("Simulated login successful!");
-    }, 1000);
+  console.log('Current user:', currentUser); // <-- Add this line
+
+  // login process
+  const handleLogin = (user) => {
+    setCurrentUser(user);
   };
 
-  // Simulate a logout process
   const handleLogout = () => {
-    console.log("Attempting to log out...");
-    setTimeout(() => {
-      setCurrentUser(null);
-      console.log("Simulated logout successful!");
-    }, 500);
+    setCurrentUser(null);
   };
 
   return (
     <Router>
       <div className="page-container">
       <Header
-        currentUser={currentUser}
-        onLogin={handleLogin}
+        user={currentUser}
         onLogout={handleLogout}
       />
       <main className="main-content">
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/about" element={<AboutUs />} />
         <Route path="/home" element={<HomePage />} />
         <Route path='/books' element={<SearchBook />} /> {/* Placeholder for BooksPage */}
         <Route path="/search" element={<SearchBook />} />
         <Route path="/login" element={<LoginPage onLogin={handleLogin} />}  />
+        <Route path="/member" element={<MemberPage currentUser={currentUser} />} /> {/* Member page */}
         <Route path="/admin" element={<LibrarianAdminPage />} /> {/* Librarian/Admin page */}
         <Route path="/books/create" element={<CreateBook />} /> {/* Create Book page */}
         <Route path="/users/create" element={<CreateUser />} /> {/* Create Book page */}
         <Route path="/users/search" element={<SearchUser />} /> {/* Search/Delete User page */}
-        <Route path="/users/update" element={<UpdateUser />} />
+        <Route path="/users/update" element={<UpdateUser />} /> {/* Update User page */}
+        <Route path="/search/books/librarian" element={<SearchBookLib />} /> {/* Search Books for librarian */}
+        <Route path="/books/update" element={<UpdateBook />} /> {/* Update Book page */}
+        <Route path="/loans/manage" element={<ManageLoan />} /> {/* Manage Loans page */}
         {/* Add other pages later, e.g. /books, /services, /about */}
       </Routes>
       </main>

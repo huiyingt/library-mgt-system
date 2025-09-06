@@ -4,9 +4,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+
 import com.example.librarymgt.services.LoanServices;
 import com.example.librarymgt.model.Loan;
 import com.example.librarymgt.model.Loanitem;
+import com.example.librarymgt.dto.LoanDTO;
+import com.example.librarymgt.dto.LoanitemDTO;
 
 @RestController
 @RequestMapping("/api/loans")
@@ -17,39 +21,62 @@ public class LoanController {
 	@Autowired //to inject the LoanServices bean
 	private LoanServices loanServices; //service to handle business logic
 	
-	@PostMapping("/create") //endpoint to create a new loan
-	public Loan createLoan(@RequestBody Loan loan) {
-		// This method will handle the creation of a new loan
-		// It will receive a Loan object from the request body
-		return loanServices.saveLoan(loan); //call the service to save the loan
-		// The saved loan object will be returned as the response	
+	// Create a new loan (used internally)
+	@PostMapping("/create")
+    public LoanDTO createLoan(@RequestBody Loan loan) {
+        Loan savedLoan = loanServices.saveLoan(loan);
+        return loanServices.mapToLoanDTO(savedLoan);
+    }
+	
+	// Borrow books for a user (creates a loan)
+	@PostMapping("/borrow")
+    public ResponseEntity<LoanDTO> borrowBook(@RequestBody LoanDTO loanDTO) {
+		LoanDTO savedLoan = loanServices.createLoanFromDTO(loanDTO);
+	    return ResponseEntity.ok(savedLoan);
 	}
 	
-	@GetMapping("/{id}") //endpoint to get a loan by ID
-	public Optional<Loan> getLoanById(@PathVariable Long id) {
-		// This method will handle the retrieval of a loan by ID
-		return loanServices.getLoanById(id); //call the service to get the loan by ID
-		// The loan object will be returned as the response
-	}
-	
-	@GetMapping("/{id}/items")
-	public List<Loanitem> getLoanItemsByLoanId(@PathVariable Long loanId) {
-	    return loanServices.getLoanItemsByLoanId(loanId);
-	}
-	
-	@GetMapping("/all") //endpoint to get all loans
-	public List<Loan> getAllLoans() {
-		// This method will handle the retrieval of all loans
-		return loanServices.getAllLoans(); //call the service to get all loans
-		// A list of loan objects will be returned as the response
-	}
-	
-	@DeleteMapping("/delete/{id}") //endpoint to delete a loan by ID (pathvariable)
-	public void deleteLoan(@PathVariable Long id) {
-		// This method will handle the deletion of an existing loan
-		 loanServices.deleteLoan(id); //call the service to delete the loan by ID
-		 System.out.println("Deleted Loan with ID: " + id);
-		 // No response body is needed for deletion, just confirmation in console log
-	}
-	
+	// Get a loan by ID
+    @GetMapping("/{id}")
+    public ResponseEntity<LoanDTO> getLoanById(@PathVariable Long id) {
+        Optional<Loan> optionalLoan = loanServices.getLoanById(id);
+        if (optionalLoan.isPresent()) {
+            return ResponseEntity.ok(loanServices.mapToLoanDTO(optionalLoan.get()));
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    // Get all loans (for librarians)
+    @GetMapping("/all")
+    public List<LoanDTO> getAllLoans() {
+        return loanServices.getAllLoans()
+                .stream()
+                .map(loanServices::mapToLoanDTO)
+                .toList();
+    }
+
+    // Get all loan items for a specific loan
+    @GetMapping("/{id}/items")
+    public List<LoanitemDTO> getLoanItemsByLoanId(@PathVariable Long id) {
+        List<Loanitem> loanItems = loanServices.getLoanItemsByLoanId(id);
+        return loanItems.stream()
+                .map(loanServices::mapToLoanitemDTO)
+                .toList();
+    }
+
+    // Get overdue items for a specific loan
+    @GetMapping("/{id}/overdue-items")
+    public List<LoanitemDTO> getOverdueItemsByLoanId(@PathVariable Long id) {
+        List<Loanitem> overdueItems = loanServices.getOverdueItemsByLoanId(id);
+        return overdueItems.stream()
+                .map(loanServices::mapToLoanitemDTO)
+                .toList();
+    }
+
+    // Delete a loan by ID
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Void> deleteLoan(@PathVariable Long id) {
+        loanServices.deleteLoan(id);
+        return ResponseEntity.noContent().build();
+    }
 }

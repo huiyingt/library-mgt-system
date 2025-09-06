@@ -1,4 +1,10 @@
 package com.example.librarymgt.model;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -31,7 +37,10 @@ public class Book {
 	
 	@Column(name = "publication_year", nullable = false)
 	private Integer publicationYear;
-
+	
+	@OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JsonManagedReference // Prevent circular reference issues in JSON serialization
+	private List<Bookcopy> copies = new ArrayList<>();// List of copies of this book
 
 	// Constructors, getters, and setters
 	public Book() {
@@ -94,9 +103,33 @@ public class Book {
 	public void setPublicationYear(Integer publicationYear) {
 		this.publicationYear = publicationYear;
 	}
-
+	
+	public List<Bookcopy> getCopies() {
+		return copies;
+	}
+	
+	public void setCopies(List<Bookcopy> copies) {
+		this.copies = copies;
+	}
+	
+	public void addCopy(Bookcopy copy) {
+		copies.add(copy);
+		copy.setBook(this);
+	}	
+	
+	public void removeCopy(Bookcopy copy) {
+		copies.remove(copy);
+		copy.setBook(null);
+	}
+	
 	@Override
 	public String toString() {
-		return "Book [ID = " + bookid + ", IBSN = " + isbn + ", Title = " + title + ", Author = " + author + ", Category = " + category + ", Publication Year = " + publicationYear + "]";
+	    String copyInfo = copies.stream()
+	        .map(c -> "[CopyNumber=" + c.getCopyNumber() + ", Status=" + c.getStatus() + "]")
+	        .collect(Collectors.joining(", "));
+	    
+	    return "Book [ID=" + bookid + ", ISBN=" + isbn + ", Title=" + title + ", Author=" + author +
+	           ", Category=" + category + ", PublicationYear=" + publicationYear +
+	           ", Copies=" + copyInfo + "]";
 	}
 }

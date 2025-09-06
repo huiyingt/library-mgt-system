@@ -42,10 +42,10 @@ public class BookcopyController {
     	
     // POST a new book copy
     @PostMapping("/create")
-    public BookcopyDTO createBookcopy(@RequestBody Bookcopy bookcopy) {
+    public BookcopyDTO createBookcopy(@RequestBody BookcopyDTO bookcopyDTO) {
     			// This method will handle the creation of a new book copy
 		// It will receive a Bookcopy object from the request body
-		return bookcopyServices.createBookcopy(bookcopy); //call the service to save the book copy
+		return bookcopyServices.createBookcopy(bookcopyDTO); //call the service to save the book copy
 		// The saved BookcopyDTO object will be returned as the response
     }
     

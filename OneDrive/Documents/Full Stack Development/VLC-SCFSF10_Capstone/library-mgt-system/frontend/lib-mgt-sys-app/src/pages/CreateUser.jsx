@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useNavigate } from 'react-router-dom';
 
 export function CreateUser () {
   const [roles, setRoles] = useState([]);
@@ -13,6 +14,11 @@ export function CreateUser () {
   });
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const navigate = useNavigate();
+  
+    const handleNavigation = (path) => {
+      navigate(path);
+    };
 
   // Fetch roles on mount
   useEffect(() => {
@@ -147,6 +153,7 @@ export function CreateUser () {
         </div><br/>
 
         <button type="submit">Create Account</button>
+        <button type="submit" onClick={() => handleNavigation('/admin')}>Back to Admin Dashboard</button>
         {/* Messages */}
         {successMessage && <p style={{ color: "green" }}>{successMessage}</p>}
         {errorMessage && <p style={{ color: "red" }}>{errorMessage}</p>}

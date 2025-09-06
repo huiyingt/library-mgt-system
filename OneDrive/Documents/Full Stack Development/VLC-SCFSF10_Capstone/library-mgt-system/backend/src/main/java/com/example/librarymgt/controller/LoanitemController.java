@@ -1,13 +1,19 @@
 package com.example.librarymgt.controller;
 
 import org.springframework.web.bind.annotation.*;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
+import com.example.librarymgt.services.BookcopyServices;
+import com.example.librarymgt.services.LoanServices;
 import com.example.librarymgt.services.LoanitemServices;
+import com.example.librarymgt.dto.LoanitemDTO;
+import com.example.librarymgt.mapper.LoanitemMapper;
+import com.example.librarymgt.model.Bookcopy;
+import com.example.librarymgt.model.Loan;
 import com.example.librarymgt.model.Loanitem;
 
 @RestController
@@ -20,69 +26,127 @@ public class LoanitemController {
 	@Autowired //to inject the LoanServices bean
 	private LoanitemServices loanitemServices; //service to handle business logic
 	
-	@PostMapping("/create") //endpoint to create a new loanitem
-	public ResponseEntity<Loanitem> createLoanitem(@RequestBody Loanitem loanitem) {
-		// This method will handle the creation of a new loanitem
-		// It will receive a Loanitem object from the request body
-		Loanitem createdLoanitem = loanitemServices.saveLoanitem(loanitem); //call the service to save the loanitem
-		return new ResponseEntity<>(createdLoanitem, HttpStatus.CREATED); //return the saved loanitem with CREATED status
-	}
+	@Autowired
+	private LoanServices loanServices; // Service to fetch Loan
+
+	@Autowired
+	private BookcopyServices bookcopyServices; // Service to fetch Bookcopy
 	
-	@GetMapping("/{id}") //endpoint to get a loanitem by ID
-	public ResponseEntity<Optional<Loanitem>> getLoanitemById(@PathVariable Long id) {
-		// This method will handle the retrieval of a loanitem by ID
-		Optional<Loanitem> loanitem = loanitemServices.getLoanitemById(id); //call the service to get the loanitem by ID
-		return new ResponseEntity<>(loanitem, HttpStatus.OK); //return the loanitem with OK status
-	}
+	// Create a new loan item
+    @PostMapping("/create")
+    public ResponseEntity<LoanitemDTO> createLoanitem(@RequestBody Loanitem loanitem) {
+        Loanitem created = loanitemServices.saveLoanitem(loanitem);
+        return new ResponseEntity<>(LoanitemMapper.toLoanitemDTO(created), HttpStatus.CREATED);
+    }
 	
-	@GetMapping("/{id}/fine") //endpoint to get the fine amount for a loanitem by ID
-	public ResponseEntity<Double> getFineAmountByLoanitemId(@PathVariable Long id) {
-		// This method will handle the retrieval of the fine amount for a loanitem by ID
-		Optional<Loanitem> loanitem = loanitemServices.getLoanitemById(id); //call the service to get the loanitem by ID
-		if (loanitem.isPresent()) {
-			double fineAmount = loanitem.get().getFineAmount(); //get the fine amount from the loanitem
-			return new ResponseEntity<>(fineAmount, HttpStatus.OK); //return the fine amount with OK status
-		} else {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND); //return NOT_FOUND status if loanitem does not exist
-		}
-	}
+    //borrow a book
+    @PostMapping("/borrow")
+    public ResponseEntity<LoanitemDTO> borrowBook(@RequestParam Long loanId, @RequestParam Long copyId) {
+        // Fetch Loan entity
+        Optional<Loan> loanOpt = loanServices.getLoanById(loanId);
+        if (loanOpt.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND); // Loan not found
+        }
+
+        // Fetch Bookcopy entity
+        Optional<Bookcopy> copyOpt = bookcopyServices.getBookcopyEntityById(copyId);
+        if (copyOpt.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND); // Book copy not found
+        }
+
+        // Borrow the book
+        Loanitem item = loanitemServices.borrowBook(loanOpt.get(), copyOpt.get());
+
+        // Convert to DTO
+        LoanitemDTO dto = LoanitemMapper.toLoanitemDTO(item);
+
+        return new ResponseEntity<>(dto, HttpStatus.CREATED);
+    }
+
+    
+    // Get loan item by ID
+    @GetMapping("/{id}")
+    public ResponseEntity<LoanitemDTO> getLoanitemById(@PathVariable Long id) {
+        Optional<Loanitem> item = loanitemServices.getLoanitemById(id);
+        return item.map(loanitem -> new ResponseEntity<>(LoanitemMapper.toLoanitemDTO(loanitem), HttpStatus.OK))
+                   .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    // Get all loan items
+    @GetMapping("/all")
+    public ResponseEntity<List<LoanitemDTO>> getAllLoanitems() {
+    	List<LoanitemDTO> dtos = loanitemServices.getAllLoanitems()
+    			.stream()
+                .map(LoanitemMapper::toLoanitemDTO)
+                .toList();
+    	return new ResponseEntity<>(dtos, HttpStatus.OK);
+    }
+    
+    // Get all loan items by username
+    @GetMapping("/loan/{loanId}")
+    public ResponseEntity<List<LoanitemDTO>> getLoanitemsByLoanId(@PathVariable Long loanId) {
+        List<LoanitemDTO> dtos = loanitemServices.getLoanitemsByLoanId(loanId)
+            .stream()
+            .map(LoanitemMapper::toLoanitemDTO)
+            .toList();
+        return new ResponseEntity<>(dtos, HttpStatus.OK);
+    }
+    
+	// Get all active loans by username
+    @GetMapping("/user/{username}")
+    public ResponseEntity<List<LoanitemDTO>> getActiveLoansByUsername(
+    		@PathVariable String username) {	
+        List<LoanitemDTO> dtos = loanitemServices.getActiveLoansByUsername(username)
+            .stream()
+            .map(LoanitemMapper::toLoanitemDTO)
+            .toList();
+        return new ResponseEntity<>(dtos, HttpStatus.OK);
+    }
+
+    // Get all overdue loan items
+    @GetMapping("/overdue")
+    public ResponseEntity<List<LoanitemDTO>> getOverdueLoanitems() {
+    	List<LoanitemDTO> dtos = loanitemServices.getOverdueLoanitems()
+    			.stream()
+                .map(LoanitemMapper::toLoanitemDTO)
+                .toList();
+    	return new ResponseEntity<>(dtos, HttpStatus.OK);
+    }
 	
-	@GetMapping("/due") //endpoint to get a loanitem by due date
-	public ResponseEntity<Optional<Loanitem>> getLoanitemByDueDate(@PathVariable LocalDate dueDate) {
-		// This method will handle the retrieval of a loanitem by due date
-		Optional<Loanitem> loanitem = loanitemServices.getLoanitemByDueDate(dueDate); //call the service to get the loanitem by due date
-		return new ResponseEntity<>(loanitem, HttpStatus.OK); //return the loanitem with OK status
-	}
-		
-	@GetMapping("/{loanId}") //endpoint to get all loanitems by loan ID
-	public ResponseEntity<List<Loanitem>> getLoanitemsByLoanId(@PathVariable Long loanId) {
-		// This method will handle the retrieval of all loanitems by loan ID
-		List<Loanitem> loanitems = loanitemServices.getLoanitemsByLoanId(loanId); //call the service to get all loanitems by loan ID
-		return new ResponseEntity<>(loanitems, HttpStatus.OK); //return the list of loanitems with OK status
-	}
+	// Check if book can be renewed
+    @GetMapping("/renew/{id}")
+    public ResponseEntity<Boolean> canRenew(@PathVariable Long id) {
+        return new ResponseEntity<>(loanitemServices.canRenew(id), HttpStatus.OK);
+    }
 	
-	@GetMapping("/all") //endpoint to get all loanitems
-	public ResponseEntity<List<Loanitem>> getAllLoanitems() {
-		// This method will handle the retrieval of all loanitems
-		List<Loanitem> loanitems = loanitemServices.getAllLoanitems(); //call the service to get all loanitems
-		return new ResponseEntity<>(loanitems, HttpStatus.OK); //return the list of loanitems with OK status
-	}
-	
-	@GetMapping("/overdue") //endpoint to get all overdue loanitems
-	public ResponseEntity<List<Loanitem>> getOverdueLoanitems() {
-		// This method will handle the retrieval of all overdue loanitems
-		List<Loanitem> overdueLoanitems = loanitemServices.getOverdueLoanitems(); //call the service to get all overdue loanitems
-		return new ResponseEntity<>(overdueLoanitems, HttpStatus.OK); //return the list of overdue loanitems with OK status
-	}
-	
-	@PutMapping("/update/{id}") //endpoint to update a loanitem by ID (pathvariable)
-	public ResponseEntity<Loanitem> updateLoanitem(@PathVariable Long id, @RequestBody Loanitem loanitem) {
-		// This method will handle the update of an existing loanitem
-		// It will receive a Loanitem object from the request body
-		Loanitem updatedLoanitem = loanitemServices.updateLoanitem(id, loanitem); //call the service to update the loanitem
-		return new ResponseEntity<>(updatedLoanitem, HttpStatus.OK); //return the updated loanitem with OK status
-	}
-	
+    // Update a loan item
+    @PutMapping("/update/{id}")
+    public ResponseEntity<LoanitemDTO> updateLoanitem(@PathVariable Long id, @RequestBody Loanitem loanitem) {
+    	Loanitem updated = loanitemServices.updateLoanitem(id, loanitem);
+        return new ResponseEntity<>(LoanitemMapper.toLoanitemDTO(updated), HttpStatus.OK);
+    }
+
+    // Return a book
+    @PutMapping("/return/{id}")
+    public ResponseEntity<LoanitemDTO> returnBook(@PathVariable Long id) {
+        Loanitem item = loanitemServices.returnBook(id);
+        return new ResponseEntity<>(LoanitemMapper.toLoanitemDTO(item), HttpStatus.OK);
+    }
+
+    // Renew a loan
+    @PutMapping("/renew/{id}")
+    public ResponseEntity<LoanitemDTO> renewLoan(@PathVariable Long id) {
+        Loanitem item = loanitemServices.renewLoan(id);
+        return new ResponseEntity<>(LoanitemMapper.toLoanitemDTO(item), HttpStatus.OK);
+    }
+
+    // Calculate fine
+    @PutMapping("/fine/{id}")
+    public ResponseEntity<LoanitemDTO> calculateFine(@PathVariable Long id) {
+        Loanitem item = loanitemServices.calculateFine(id);
+        return new ResponseEntity<>(LoanitemMapper.toLoanitemDTO(item), HttpStatus.OK);
+    }
+    
 	@DeleteMapping("/delete/{id}") //endpoint to delete a loanitem by ID
 	public ResponseEntity<Void> deleteLoanitem(@PathVariable Long id) {
 		// This method will handle the deletion of a loanitem by ID

@@ -1,13 +1,14 @@
 package com.example.librarymgt.controller;
 
 import org.springframework.web.bind.annotation.*;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import com.example.librarymgt.services.BookServices;
 import com.example.librarymgt.model.Book;
+import com.example.librarymgt.dto.BookDTO;
 @RestController
 @RequestMapping("/api/books")
 @CrossOrigin(origins= "http://localhost:5173")
@@ -53,14 +54,28 @@ public class BookController {
 		// A list of book objects will be returned as the response
 	}
 	
-	// Endpoint to search books by title or author (case-insensitive)
-	// Search by title OR author (single input box)
-	@GetMapping("/search")
-	public List<Book> searchBooks(@RequestParam String query) {
+	// Search available books by title or author (for users)
+	@GetMapping("/search/user")
+	public List<BookDTO> searchBooksForUsers(@RequestParam String query) {
 	    if (query == null || query.trim().isEmpty()) {
-	        return new ArrayList<>(); // return empty list if nothing entered
+	        return new ArrayList<>();
 	    }
-	    return bookServices.searchBooks(query);
+	    return bookServices.searchBooksForUsersDTO(query);
+	}
+	
+	// Get all books with all copies (for librarians)
+	@GetMapping("/all/librarian")
+	public List<BookDTO> getAllBooksWithCopiesForLibrarians() {
+	    return bookServices.getAllBooksWithCopiesForLibrariansDTO();
+	}
+
+	// Search books by title or author with all copies (for librarians)
+	@GetMapping("/search/librarian")
+	public List<BookDTO> searchBooksForLibrarians(@RequestParam String query) {
+	    if (query == null || query.trim().isEmpty()) {
+	        return new ArrayList<>();
+	    }
+	    return bookServices.searchBooksForLibrariansDTO(query);
 	}
 	
 	@PutMapping("/update/{bookid}") //endpoint to update a book by ID (pathvariable)

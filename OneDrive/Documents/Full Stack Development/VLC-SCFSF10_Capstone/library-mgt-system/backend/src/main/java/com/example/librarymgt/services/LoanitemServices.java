@@ -1,11 +1,11 @@
 package com.example.librarymgt.services;
 //this is business logic layer
-//perform CRUD operations on Book data
 import com.example.librarymgt.repository.LoanitemRepository;
+import com.example.librarymgt.model.Bookcopy;
+import com.example.librarymgt.model.Loan;
 import com.example.librarymgt.model.Loanitem;
 
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,13 +17,33 @@ public class LoanitemServices {
 	@Autowired //to inject the LoanitemRepository bean
 	private LoanitemRepository loanitemr; //repository to access Loanitem data
 	
+	@Autowired
+	private BookcopyServices bookcopyServices;
+	
 	// Method to save a new loanitem
 	public Loanitem saveLoanitem(Loanitem loanitem) {
-		// Need data: a loanitem object
-		// saveLoanitem requires Loanitem details
-		// Use LoanitemRepository to save the loanitem
 		System.out.println("Loan item created: " + loanitem);
 		return loanitemr.save(loanitem); //returns the saved loanitem object
+	}
+	
+	public Loanitem borrowBook(Loan loan, Bookcopy bookCopy) {
+		if (bookCopy.getStatus() == Bookcopy.Status.BORROWED) {
+	        throw new RuntimeException("Book copy is already borrowed.");
+	    }
+		
+	    Loanitem item = new Loanitem();
+	    item.setLoan(loan);
+	    item.setBookCopy(bookCopy);
+	    item.setDueDate(LocalDate.now().plusDays(14)); // default 14-day loan period
+	    item.setRenewalCount("0");
+	    item.setReturnDate(null);
+	    item.setFineAmount(0.0);
+	    
+	    // Update book copy status
+	    bookCopy.setStatus(Bookcopy.Status.BORROWED);
+	    bookcopyServices.updateBookcopy(bookCopy.getId(), bookCopy);
+	    
+	    return loanitemr.save(item);
 	}
 	
 	// Method to get a loanitem by ID
@@ -32,16 +52,15 @@ public class LoanitemServices {
 		return loanitemr.findById(id); //returns the loanitem if found, otherwise null
 	}
 	
-	// Method to get a loanitem by due date
-	public Optional<Loanitem> getLoanitemByDueDate(LocalDate dueDate) {
-		// Use LoanitemRepository to find the loanitem by Loan ID
-		return loanitemr.findByDueDate(dueDate); //returns the loanitem if found, otherwise null
-	}
-	
 	// Method to get all loanitems by loan ID
 	public List<Loanitem> getLoanitemsByLoanId(Long loanId) {
 		// Use LoanitemRepository to find all loanitems by Loan ID
 		return loanitemr.findByLoanId(loanId); //returns a list of loanitems for the specified loan
+	}
+	
+	//Method to get all active loans for a user
+	public List<Loanitem> getActiveLoansByUsername(String username) {
+	    return loanitemr.findByLoanUserUsernameAndReturnDateIsNull(username);
 	}
 	
 	// Method to get all loanitems
@@ -52,9 +71,8 @@ public class LoanitemServices {
 	
 	// Method to get overdue loanitems
 	public List<Loanitem> getOverdueLoanitems() {
-	    LocalDate today = LocalDate.now();
 	    return loanitemr.findAll().stream()
-	            .filter(item -> item.getDueDate().isBefore(today) && item.getReturnDate() == null)
+	    		.filter(Loanitem::isOverdue)
 	            .toList();
 	}
 
@@ -68,52 +86,68 @@ public class LoanitemServices {
 			existingLoanitem.setDueDate(loanitemDetails.getDueDate());
 		if (loanitemDetails.getReturnDate() != null) //check if return date is not null
 			existingLoanitem.setReturnDate(loanitemDetails.getReturnDate());
+		if (loanitemDetails.getRenewalCount() != null) { //check if renewal count is not null
+			int renewalCountInt = Integer.parseInt(loanitemDetails.getRenewalCount());
+		    if (renewalCountInt >= 0) {
+		        existingLoanitem.setRenewalCount(String.valueOf(renewalCountInt));
+		    }
+        }
+        if (loanitemDetails.getFineAmount() >= 0) {
+            existingLoanitem.setFineAmount(loanitemDetails.getFineAmount());
+        }
+
 		// Save the updated loanitem
 		return loanitemr.save(existingLoanitem); //returns the updated loanitem object
 	}
 	
-	// Method to renew a loan item
-	public Loanitem renewLoan(Long id) {
-	    Loanitem loanitem = loanitemr.findById(id)
+	// Method to return book
+	public Loanitem returnBook(Long id) {
+	    Loanitem item = loanitemr.findById(id)
 	        .orElseThrow(() -> new RuntimeException("Loan item not found with ID: " + id));
-
-	    // Business rule: max 2 renewals allowed
-	    if (loanitem.getRenewalCount() >= 2) {
-	        throw new RuntimeException("Maximum renewals reached for this loan item.");
+	    if (item.getReturnDate() != null) {
+	        throw new RuntimeException("This book has already been returned.");
 	    }
-
-	    // Extend due date by 14 days for each renewal
-	    loanitem.setDueDate(loanitem.getDueDate().plusDays(14));
-	    loanitem.setRenewalCount(loanitem.getRenewalCount() + 1);
-
-	    return loanitemr.save(loanitem);
+	    
+	    item.setReturnDate(LocalDate.now());
+	    item.calculateFine(); // Update fine if overdue
+	    
+	    // Update book copy status
+	    Bookcopy bookCopy = item.getBookCopy();
+	    bookCopy.setStatus(Bookcopy.Status.AVAILABLE);
+	    bookcopyServices.updateBookcopy(bookCopy.getId(), bookCopy);
+	    
+	    return loanitemr.save(item);
 	}
 	
-	// Method to calculate fine based on overdue days
-	public Loanitem calculateFine(Long id) {
-	    Loanitem loanitem = loanitemr.findById(id)
+	// Calculate fine for a loan item
+    public Loanitem calculateFine(Long id) {
+        Loanitem item = loanitemr.findById(id)
+                .orElseThrow(() -> new RuntimeException("Loan item not found with ID: " + id));
+        item.calculateFine();           // call entity method
+        return loanitemr.save(item);
+    }
+	
+	// Method to renew a loan item
+	public Loanitem renewLoan(Long id) {
+        Loanitem item = loanitemr.findById(id)
+                .orElseThrow(() -> new RuntimeException("Loan item not found with ID: " + id));
+        
+        Bookcopy bookCopy = item.getBookCopy();
+        if (bookCopy.getStatus() != Bookcopy.Status.BORROWED) {
+            throw new RuntimeException("Cannot renew: book copy is not currently borrowed.");
+        }
+        
+        item.renew();                  // call entity method
+        return loanitemr.save(item);
+    }
+	
+	// Method to check if book can be renewed
+	public boolean canRenew(Long id) {
+	    Loanitem item = loanitemr.findById(id)
 	        .orElseThrow(() -> new RuntimeException("Loan item not found with ID: " + id));
-
-	    long overdueDays = 0;
-
-	    if (loanitem.getReturnDate() != null) {
-	        // Book is returned, check overdue against return date
-	        overdueDays = ChronoUnit.DAYS.between(loanitem.getDueDate(), loanitem.getReturnDate());
-	        overdueDays = Math.max(overdueDays, 0); // Ensure no negative fine
-	    } else {
-	        // Book not yet returned, check overdue up to today
-	        overdueDays = ChronoUnit.DAYS.between(loanitem.getDueDate(), LocalDate.now());
-	    }
-
-	    if (overdueDays > 0) {
-	        double fine = overdueDays * 0.50; // Fine is $0.50 per day
-	        fine = Math.min(fine, 20.0); // Cap fine at $20.00
-	        loanitem.setFineAmount(fine);
-	    } else {
-	        loanitem.setFineAmount(0.0);
-	    }
-	    return loanitemr.save(loanitem);
+	    return item.canRenew();
 	}
+	
 
 	// Method to delete a loanitem by ID
 	public void deleteLoanitem(Long id) {

@@ -9,5 +9,4 @@ public interface LoanRepository extends JpaRepository<Loan, Long> {
 	// No need to implement any methods, Spring Data JPA will handle it
 	// count(), findAll(), findById(), save(), deleteById() etc. are all available to help work with SQL queries
 
-
 }

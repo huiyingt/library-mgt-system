@@ -22,7 +22,7 @@ export function SearchBook () {
         setError(null);
 
         try {
-            const response = await axios.get(`http://localhost:8080/api/books/search?query=${searchTerm}`);
+            const response = await axios.get(`http://localhost:8080/api/books/search/user?query=${searchTerm}`);
             setBooks(response.data);
         }   catch (error) {
             setError(`Error fetching books. Please try again. ${error.message}`);
@@ -64,18 +64,31 @@ export function SearchBook () {
         };
 
         return (
-            <>
-                <li key={book.bookid} className="result-item">
-                    <strong>ISBN:</strong> {book.isbn} <br />
-                    <strong>Title:</strong> {book.title} <br />
-                    <strong>Author:</strong> {book.author} <br />
-                    <strong>Year:</strong> {book.publicationYear} <br />
-                    <strong>Category:</strong> {categoryMap[book.category] || book.category} <br />
+      <li key={book.bookid} className="result-item">
+        <strong>ISBN:</strong> {book.isbn} <br />
+        <strong>Title:</strong> {book.title} <br />
+        <strong>Author:</strong> {book.author} <br />
+        <strong>Year:</strong> {book.publicationYear} <br />
+        <strong>Category:</strong> {categoryMap[book.category] || book.category} <br />
+
+        {/* Display available copies */}
+        {book.copies && book.copies.length > 0 ? (
+          <div>
+            <strong>Available Copies:</strong>
+            <ul>
+              {book.copies.map((copy, idx) => (
+                <li key={idx}>
+                  Copy #{copy.copyNumber} - {copy.status}
                 </li>
-                <br/>
-            </>
-        );
-        })}
+              ))}
+            </ul>
+          </div>
+        ) : (
+          <p>No available copies.</p>
+        )}
+      </li>
+    );
+    })}
     </ul>
     </div>
 );

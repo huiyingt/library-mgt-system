@@ -31,7 +31,7 @@ public class UserController {
 		// The user object will be returned as the response
 	}
 	
-	@GetMapping("/search") // endpoint: /api/users/search?query=leila
+	@GetMapping("/search") // endpoint: /api/users/search?query=username
 	public List<User> searchUsers(@RequestParam String query) {
 	    // call your service method to search by username OR email
 	    return userServices.searchByUsernameOrEmail(query);

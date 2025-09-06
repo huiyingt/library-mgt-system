@@ -1,4 +1,6 @@
 package com.example.librarymgt.model;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -20,6 +22,7 @@ public class Bookcopy {
 	
 	@ManyToOne(fetch = FetchType.LAZY)  
 	@JoinColumn(name = "book_id", nullable = false) // FK in BookCopies table
+	@JsonBackReference // Prevent circular reference issues in JSON serialization
 	private Book book; // The book this copy belongs to
 	
 	@Column (name = "copy_number", nullable = false)
